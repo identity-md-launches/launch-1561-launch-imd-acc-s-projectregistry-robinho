@@ -1,0 +1,247 @@
+<title>imd/acc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow reading column in the IMD ecosystem's monochrome style; ruled sections, pills for status, a live cashback calculator as the hero's proof. */
+:root {
+  --paper: #fbfbf9; --ink: #111312; --dim: #565b58; --faint: #8d928f; --rule: #d9dcda; --soft: #f0f2f0;
+  --ok: #1f7a4c; --ok-soft: #e3f1e9; --wait: #8a6414; --wait-soft: #f6eedb;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0d0f0e; --ink: #eef0ee; --dim: #a3a9a5; --faint: #6f7571; --rule: #2a2e2c; --soft: #171a19;
+  --ok: #4fd18f; --ok-soft: #12261b; --wait: #e2b65a; --wait-soft: #2a2213; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #0d0f0e; --ink: #eef0ee; --dim: #a3a9a5; --faint: #6f7571; --rule: #2a2e2c; --soft: #171a19;
+  --ok: #4fd18f; --ok-soft: #12261b; --wait: #e2b65a; --wait-soft: #2a2213; color-scheme: dark; }
+
+body { background: var(--paper); color: var(--ink); font: 16px/1.6 var(--sans); }
+.wrap { max-width: 760px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 56px; }
+a { color: inherit; text-underline-offset: 3px; }
+a:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+code, .mono { font-family: var(--mono); font-size: .92em; }
+.label { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+h1, h2 { font-family: var(--mono); font-weight: 600; letter-spacing: -.01em; text-wrap: balance; margin: 0; }
+h2 { font-size: 20px; }
+p { margin: 0; max-width: 65ch; }
+section { display: grid; gap: 18px; border-top: 1.5px solid var(--ink); padding-top: 22px; }
+
+header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mark { font: 600 18px/1 var(--mono); border: 1.5px solid var(--ink); border-radius: 999px; padding: 9px 16px; }
+.mark span { color: var(--faint); }
+
+.hero { display: grid; gap: 18px; }
+.hero h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.12; }
+.hero p { color: var(--dim); font-size: 18px; }
+
+.calc { border: 1.5px solid var(--ink); display: grid; grid-template-columns: 1fr 1fr; }
+.calc > div { padding: 18px; display: grid; gap: 8px; min-width: 0; }
+.calc > div + div { border-left: 1.5px solid var(--ink); background: var(--ok-soft); }
+.calc input { font: 600 24px var(--mono); width: 100%; background: transparent; color: var(--ink); border: 0; border-bottom: 1.5px solid var(--rule); padding: 4px 0; font-variant-numeric: tabular-nums; }
+.out { font: 600 28px/1.2 var(--mono); color: var(--ok); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.calc small { color: var(--dim); font-size: 13px; }
+
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+ol.steps li::before { content: counter(s); font: 600 14px/1 var(--mono); border: 1.5px solid var(--ink); border-radius: 999px; width: 30px; height: 30px; display: grid; place-items: center; }
+ol.steps li > div { min-width: 0; }
+ol.steps b { font-family: var(--mono); font-weight: 600; }
+
+.facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--rule); }
+.facts > div { padding: 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.facts > div + div { border-left: 1px solid var(--rule); }
+.facts.two { grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--rule); }
+.facts.two > div { background: var(--paper); border: 0; }
+.facts strong { font: 600 15px var(--mono); }
+.facts p { font-size: 14px; color: var(--dim); }
+
+.projects { display: grid; gap: 12px; }
+.proj { border: 1.5px solid var(--ink); padding: 18px; display: grid; gap: 10px; }
+.proj-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.proj h3 { font: 600 20px var(--mono); margin: 0; }
+h2 .pill { vertical-align: middle; margin-left: 8px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; border: 1.5px solid currentColor; border-radius: 999px; padding: 6px 10px; }
+.pill.go { color: var(--ok); background: var(--ok-soft); }
+.pill.wait { color: var(--wait); background: var(--wait-soft); }
+.pill.chain { color: var(--dim); }
+.proj p { color: var(--dim); font-size: 15px; }
+.proj dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: 14px; }
+.proj dt { font: 500 11px/1.9 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+.proj dd { margin: 0; min-width: 0; }
+
+pre { margin: 0; background: var(--soft); border: 1px solid var(--rule); padding: 14px 16px; overflow-x: auto; font: 13.5px/1.6 var(--mono); }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: var(--dim); max-width: 65ch; }
+footer { color: var(--faint); font-size: 13px; display: grid; gap: 6px; }
+
+@media (max-width: 620px) {
+  .calc { grid-template-columns: 1fr; }
+  .calc > div + div { border-left: 0; border-top: 1.5px solid var(--ink); }
+  .facts, .facts.two { grid-template-columns: 1fr; }
+  .facts > div + div { border-left: 0; border-top: 1px solid var(--rule); }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="mark">imd<span>/</span>acc</div>
+    <span class="label">Sepolia first · Oct 2026</span>
+  </header>
+
+  <div class="hero">
+    <span class="label">Trading cashback for the IMD ecosystem</span>
+    <h1>Every trade stacks staked IMD for you.</h1>
+    <p>Participating projects send 0.25% to 1% of every trade, at each project's choice, back to the trader as sIMD, deposited straight into IMD's staking vault in their name. No claim, no extra fee, and it keeps earning.</p>
+    <div class="calc" role="group" aria-label="Cashback calculator">
+      <div>
+        <label class="label" for="trade">Your trade, in IMD</label>
+        <input id="trade" type="number" min="0" step="1" value="1000" inputmode="decimal">
+        <small>Try a size you'd actually trade.</small>
+      </div>
+      <div>
+        <span class="label">Stacked to your wallet</span>
+        <div class="out" id="out">5 IMD</div>
+        <small>as sIMD at a 0.5% rate, like PLEA's. Ten trades this size: <span class="mono" id="ten">50 IMD</span></small>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><div><b>You trade</b> in a participating pool, say PLEA/IMD, through the project's site or any router that reaches the pool.</div></li>
+      <li><div><b>The hook takes its rate (0.25%–1%) on the IMD side</b> of your trade. On IMD-paired pools there's nothing to swap, so it costs little gas and has no slippage.</div></li>
+      <li><div><b>It deposits that IMD into the sIMD vault for you</b> with <code>deposit(amount, you)</code>. The vault mints the shares straight to your wallet.</div></li>
+      <li><div><b>Your sIMD balance goes up.</b> Open the staking page or your wallet and it's there, growing with the vault's yield. Unstake whenever you like.</div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Shipping order</h2>
+    <p>imd/acc goes live first, on Sepolia. PLEA then plugs into it as the first project, so PLEA's test run is also imd/acc's first real integration test.</p>
+    <ol class="steps">
+      <li><div><b>imd/acc on Sepolia.</b> A contracts-only IMD launch: a test IMD with a faucet, a test copy of the sIMD vault, and the Stacker, plus a small page with your stack and the leaderboards.</div></li>
+      <li><div><b>PLEA on Sepolia, the first integration.</b> PLEA reuses those three contracts. Its hook pays the 0.5% cashback through <code>stacker.credit</code> on every trade.</div></li>
+      <li><div><b>Mainnet.</b> The Stacker is deployed against the real IMD and sIMD vault, and PLEA mainnet points at it.</div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Why it holds up</h2>
+    <div class="facts">
+      <div><strong>Nobody holds your cashback</strong><p>imd/acc never takes custody. Shares are minted directly to the trader's address.</p></div>
+      <div><strong>The vault is renounced</strong><p>sIMD's <code>owner()</code> reads <code>0x0</code> and it isn't paused, checked on-chain on 9 Oct 2026. Nobody can pause it or sweep it.</p></div>
+      <div><strong>No fee on top</strong><p>Projects fund the cashback from fees they already charge. Traders pay nothing extra.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>First projects</h2>
+    <div class="projects">
+      <article class="proj">
+        <div class="proj-top">
+          <h3>PLEA</h3>
+          <div class="chips"><span class="pill chain">Ethereum · Sepolia first</span><span class="pill go">First integration</span></div>
+        </div>
+        <p>A sell-gated meme token: buying is open, but selling takes a plea approved by an IMD oracle panel. Every PLEA/IMD trade stacks sIMD for the trader.</p>
+        <dl>
+          <dt>Cashback</dt><dd>0.5% of each trade, deposited into sIMD in the trader's name</dd>
+          <dt>Funded by</dt><dd>PLEA's own trading fee. Its hook sets the fees, so traders pay nothing extra</dd>
+          <dt>If it fails</dt><dd>The cashback is sent as plain IMD instead, so a trade never reverts</dd>
+          <dt>Vault</dt><dd>The test vault on Sepolia first, then sIMD on Ethereum</dd>
+        </dl>
+      </article>
+      <article class="proj">
+        <div class="proj-top">
+          <h3>PondPad</h3>
+          <div class="chips"><span class="pill chain">Robinhood Chain</span><span class="pill wait">Planned</span></div>
+        </div>
+        <p>An IMD-paired token launchpad. imd/acc becomes its trading-rewards feature, paid out of fees it already collects in IMD.</p>
+        <dl>
+          <dt>Cashback</dt><dd>0.25%–1% of each trade, its choice</dd>
+          <dt>Funded by</dt><dd>Existing launchpad fees, not an extra charge</dd>
+          <dt>Vault</dt><dd>sIMD lives on Ethereum. Needs an sIMD vault on Robinhood Chain, a bridge, or plain-IMD cashback there.</dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>For projects</h2>
+    <p>Any IMD-paired project can join with one call from its hook. Projects without a hook can use the drop-in imd/acc hook.</p>
+    <pre>// in your hook's afterSwap, with the trader taken from hookData
+uint256 cashback = imdSideAmount * RATE_BPS / 10_000;   // 25-100 bps (0.25%-1%)
+try stacker.credit(trader, cashback) {             // → sIMD.deposit(cashback, trader)
+} catch {
+    IMD.transfer(trader, cashback);                // plain IMD; the trade never reverts
+}</pre>
+    <ul class="plain">
+      <li>Pass the real trader in <code>hookData</code> and fall back to <code>sender</code>, never <code>tx.origin</code>.</li>
+      <li>Approve the Stacker once. It has no owner, and its IMD and sIMD addresses can never change.</li>
+      <li>Every credit emits <code>Stacked(project, trader, imd, shares)</code> for leaderboards.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Fees in ETH <span class="pill wait">v2</span></h2>
+    <p>Projects paired with ETH join through a batched route. Their cashback still ends up as sIMD, with one swap through POOL4 along the way.</p>
+    <ol class="steps">
+      <li><div><b>Each trade records the cashback in ETH</b> against the trader's address. There's no swap yet, so it costs little gas.</div></li>
+      <li><div><b>Anyone calls flush()</b>, for a small tip. The pooled ETH is swapped to IMD in one trade through POOL4, IMD's main ETH pool, which also burns a cut of IMD.</div></li>
+      <li><div><b>The IMD goes into sIMD</b> and the shares are split between traders by how much ETH each one had waiting.</div></li>
+    </ol>
+    <ul class="plain">
+      <li>Every flush has a price guard against a recent average price, and a maximum size.</li>
+      <li>Waiting ETH can only be swapped and credited to its trader. It can't go anywhere else.</li>
+      <li>Batching avoids doubling gas on every trade and stops bots from sandwiching small swaps.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Points now, token maybe later</h2>
+    <p>imd/acc has no token. The product is IMD, and all of the cashback goes to traders. Every stack still counts: each trader and each project earns points equal to the IMD stacked, recorded on-chain from the first trade.</p>
+    <div class="facts two">
+      <div><strong>Trader points</strong><p>All-time IMD stacked for you, across every listed project.</p></div>
+      <div><strong>Project points</strong><p>IMD its traders stacked. Shows who brings the volume.</p></div>
+      <div><strong>Only listed projects count</strong><p>Anyone can stack IMD for someone, but only credits from listed projects earn points, starting the day they're listed. Stacking your own IMD earns none.</p></div>
+      <div><strong>If it takes off</strong><p>That history can seed a fair-launch token for early stackers and integrating projects. Points are a record, not a promise.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Still open</h2>
+    <ul class="plain">
+      <li>An sIMD vault on Robinhood Chain, for PondPad and other projects there.</li>
+      <li>Cashback on buys only, or on sells too. PLEA's test run pays it on both.</li>
+      <li>Who decides which projects earn points. For now it's a list in the site; later an IMD oracle panel could vote projects on and off it.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Inspired by <a href="https://www.token.works/archive/btcacc">btc/acc</a> by TokenWorks, which stacked BTC for traders on every trade.</span>
+    <span class="mono">sIMD vault 0x9efa934d9fad4ae28c998a40195646b965a97247</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var input = document.getElementById('trade');
+  var out = document.getElementById('out');
+  var ten = document.getElementById('ten');
+  function fmt(n) {
+    var d = n < 1 ? 4 : n < 100 ? 2 : 0;
+    return n.toLocaleString(undefined, { maximumFractionDigits: d }) + ' IMD';
+  }
+  function update() {
+    var v = parseFloat(input.value);
+    if (!isFinite(v) || v < 0) v = 0;
+    var c = v * 0.005;
+    out.textContent = fmt(c);
+    ten.textContent = fmt(c * 10);
+  }
+  input.addEventListener('input', update);
+  update();
+})();
+</script>

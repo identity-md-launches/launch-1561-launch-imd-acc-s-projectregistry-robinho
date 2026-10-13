@@ -1,0 +1,88 @@
+name: List my project
+description: Apply for your project's imd/acc credits to earn points. See docs/listing.md first.
+title: "Listing: <project name> on <chain>"
+labels: ["listing"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Your traders already get sIMD from every credit, listed or not. Listing makes those credits earn points.
+        Read [docs/listing.md](https://github.com/khaed1/imd-acc/blob/main/docs/listing.md) first: the checklist and the fee guard decide the review.
+  - type: input
+    id: name
+    attributes:
+      label: Project name
+    validations:
+      required: true
+  - type: dropdown
+    id: chain
+    attributes:
+      label: Chain
+      options:
+        - Sepolia
+        - Ethereum mainnet
+        - Robinhood Chain
+        - Other (say which below)
+    validations:
+      required: true
+  - type: input
+    id: address
+    attributes:
+      label: Contract that calls Stacker.credit
+      description: Usually your hook. 0x…
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Verified source
+      description: Link to the verified contract on the chain's explorer.
+    validations:
+      required: true
+  - type: input
+    id: rate
+    attributes:
+      label: Cashback rate (basis points, 25 to 100)
+      description: 50 means 0.5% of each trade.
+    validations:
+      required: true
+  - type: textarea
+    id: fees
+    attributes:
+      label: Fee split
+      description: |
+        Every part of your trading fee, its size and where it goes. Mark which parts come back to you (owner share, treasury, liquidity you can withdraw)
+        and which really leave (burns, locked liquidity, prizes to others, third-party fees). "Really leaves" must be at least your cashback.
+        If the fees can change later, give the limits in the code.
+      placeholder: |
+        1.75% total: 0.5% cashback, 0.5% owner (comes back), 0.25% locked liquidity (leaves), 0.25% burn (leaves), 0.25% prizes (leaves). Fixed in the code.
+    validations:
+      required: true
+  - type: input
+    id: beneficiary
+    attributes:
+      label: Beneficiary wallet
+      description: Holds the project's points (a hook contract can't receive an airdrop).
+    validations:
+      required: true
+  - type: input
+    id: deploy
+    attributes:
+      label: Deploy block, and the block you go live (if not yet live)
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Integration rules
+      options:
+        - label: credit is called only inside real trades, never with our own IMD for wallets we pick
+          required: true
+        - label: the trader is the real one (router hookData, else sender, never tx.origin)
+          required: true
+        - label: a failed credit pays the trader plain IMD and never blocks the trade
+          required: true
+        - label: gas for credit is checked up front, so a wallet's estimate can't skip the cashback
+          required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else

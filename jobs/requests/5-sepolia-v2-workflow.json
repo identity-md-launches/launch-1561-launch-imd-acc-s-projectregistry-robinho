@@ -1,0 +1,50 @@
+{
+  "action": "workflow.open",
+  "input": {
+    "request": "Deploy two smart contracts on the Sepolia blockchain, the imd/acc Stacker and the imd/acc ProjectRegistry, then build a website for them. Their source, tests and launch.json are in github.com/khaed1/imd-acc (sepolia branch). What they do: a trading project calls credit(trader, amount) on the Stacker, which takes that much test IMD from the project and deposits it into the live TestSIMD staking vault in the trader's name, so the trader receives staked IMD as trading cashback (each project picks a rate from 0.25% to 1% of each trade), and it emits a Stacked event used for points. The ProjectRegistry decides which projects earn points: anyone applies or challenges, paying an IdentityMD oracle question through the Intake, and the oracle panel's signed yes or no lists or delists the project. Neither contract has an owner. They are wired to the TestIMD and TestSIMD contracts already live on Sepolia and to the IdentityMD Intake, which are reused, not redeployed. Steps: audit the imported code, adapt it to launch, an independent review, deploy both contracts on Sepolia, then a test website against the deployed addresses where a connected wallet can use the faucet, stack to itself, apply for or challenge a listing, and see its cashback, points and leaderboards.",
+    "context": "Sepolia only (chainId 11155111). Launch kind evm_contracts with two contracts, the Stacker then the ProjectRegistry, as launch.json lists them. TestIMD 0x2b69099e59b05901faa1dd164fabf098bf831e82, TestSIMD 0xf9e2eec3b610ec6781f7438ac5fb4bc049d81cc1 and the Intake 0xa43e6f75ee006411f79ac1c84120606c2330de82 are live and reused. No owner or admin. GitHub publication is approved. Publishing the website at a public URL is approved; the platform publishes it from the release settings, so the website builders do not publish it themselves. Both contracts are deployed by the platform's launch, as usual.",
+    "draft": {
+      "objective": "Launch imd/acc's second Sepolia test run from this repository's sepolia branch: deploy the updated Stacker and the new ProjectRegistry, exactly as launch.json lists them, wired to the live TestIMD and TestSIMD of launch #1129 and to IdentityMD's Intake v2. PLEA's next version will pay its cashback through this Stacker and apply to this registry; mainnet will use the same code from the main branch. imd/acc pays trading cashback to traders as staked IMD (sIMD), 0.25% to 1% of each trade at each project's choice, funded from the project's existing fees.\n\nDEPLOY (Sepolia, two contracts, in this order):\n1. Stacker(imd, sImd) with imd = 0x2b69099e59b05901faa1dd164fabf098bf831e82 (TestIMD; faucet() gives 10,000 tIMD per address per 24h) and sImd = 0xf9e2eec3b610ec6781f7438ac5fb4bc049d81cc1 (TestSIMD, a StakedIMD copy whose owner 0x4b91…6821 can pause it). Both are live; do not deploy new ones. src/Stacker.sol stays as it is: no owner, admin, fee, pause or upgrade; credit(trader, imdAmount) pulls IMD from msg.sender and calls sIMD.deposit(imdAmount, trader); per-project totals on chain; event Stacked(project, trader, imd, shares). The constructor checks the vault only where it has code, so the empty-chain rehearsal passes.\n2. ProjectRegistry(intake, oracleAsset, stacker, oracleSigner, questionChainId, challengeBond, challengeCooldown) = (0xa43e6f75ee006411f79ac1c84120606c2330de82 Intake v2, 0x44a1cd38474fb1748400e7deb5f8d786cce3f89a Sepolia test IMD, $contract:Stacker, 0x5598aa9146215bc13eb26f2c692ad1461fd32982 oracle signer, 1, 5e18, 3600). No owner. Anyone calls applyListing(project, name, sourceUrl, rateBps 25-100, beneficiary) or challenge(project, reason), paying the 0.5 IMD oracle fee (plus the bond for a challenge); the registry asks Intake v2 one yes-or-no question with requestWithFailure. onOracleResult (0x510379c7) accepts only the Intake, only its own open request, only a signature by the oracle signer for this contract issued after the ask, from a panel of 15 with 11 agreeing: yes lists from that block, or keeps a challenged project (bond to its beneficiary); no rejects, or delists from that block (bond back). onOracleFailure (0xa7980e31) only clears the open question and returns a bond; expire clears one after a day or once the Intake completed it. Questions are filed under chain 1 (the oracle has no Sepolia RPC) and name Sepolia in the text. src/ProjectRegistry.sol and src/oracle/OracleAttestation.sol stay as they are.\n- test/mocks holds test doubles only. Keep foundry.toml as it is (solc 0.8.26, cancun, 10,000 runs, bytecode_hash none).\n\nFACTS (2026-10-11): TestSIMD asset() = TestIMD, owner 0x4b91…6821, not paused. Intake v2 is live on Sepolia (callback gas 1,000,000) and sells oracle.request@oracle-1 for 0.5 of the test IMD, which anyone can mint. On a Sepolia fork with the real Intake, applyListing paid it and opened a request with both callbacks; a listing answer used 77k gas.\n\nTESTS: forge test passes (68 tests). SepoliaFork and RegistrySepoliaFork run against live Sepolia when SEPOLIA_RPC_URL is set; MainnetFork against mainnet when ETH_RPC_URL is set; skipped otherwise. Keep all of them passing.\n\nREADME: once live, add both addresses as \"Sepolia test run 2\" in the Deployments table.",
+      "shape": "chain",
+      "onchain": "evm_contracts",
+      "chainId": 11155111,
+      "github": true,
+      "ipfs": "imd-acc-sepolia-v2",
+      "repoUrl": "https://github.com/khaed1/imd-acc.git",
+      "baseCommit": "724d1fcffdb4180daf76fc556f8e5608234f8eb9",
+      "references": [
+        "evm-contracts-launch",
+        "defi-native",
+        "eth-security",
+        "eth-testing",
+        "pashov-skill",
+        "solidity-security-review",
+        "eth-frontend-ux",
+        "better-interface"
+      ],
+      "steps": [
+        {
+          "skill": "audit-imported-code"
+        },
+        {
+          "skill": "adapt-contract-project"
+        },
+        {
+          "skill": "adversarial-review"
+        },
+        {
+          "skill": "build-website",
+          "objective": "TEST PAGE for Sepolia test run 2, against the Stacker and ProjectRegistry this release deploys and the live TestIMD and TestSIMD. One static page, light and dark, no horizontal scroll at 360 px. Reuse the look of the first test page (site/ in github.com/identity-md-launches/launch-1129-build-imd-acc-sepolia-test).\n- Your stack (connected wallet): cashback received and points, split per project, added up from the Stacked events (this Stacker stores no per-trader totals); tsIMD held now (balanceOf); what the cashback is worth now (the shares in the wallet's Stacked events, priced with convertToAssets); earned on top (worth now minus cashback received).\n- Listed projects, from the registry's events (Listed, Delisted, Rejected, Applied, Challenged, Defended, AskCleared): each project's state, cashback rate (rateBps 25 to 100, that is 0.25% to 1%), beneficiary and listing periods (Listed block to Delisted block). Points and leaderboards count only Stacked events from a project inside one of its listing periods, 1 point per IMD; everything else shows as \"direct, no points\".\n- Registry tools: Get test IMD (mint(self, 10e18) on the test IMD 0x44a1cd38474fb1748400e7deb5f8d786cce3f89a); Apply (project, name, source URL, rate, beneficiary; approve 0.5, then applyListing); Challenge a listed project (reason; approve 0.5 plus challengeBond, then challenge); open questions with their age, and Expire once allowed. Explain that the answer comes from an IdentityMD oracle panel in a few minutes and show the outcome when it arrives.\n- Leaderboards: top stackers by points and top listed projects by IMD stacked, with trader counts, from logs read in chunks from the deploy block; the last ten stacks of any kind.\n- Test tools: faucet (show the next allowed time from nextFaucetAt) and \"stack to myself\" (approve, then credit(self, x)), shown as direct.\n- Contracts: the four addresses with Sepolia explorer links, the vault's open or paused state and its totals.\n- Wallet: connect, switch to Sepolia (11155111), per-button pending, success and error states; send each transaction with its gas estimate times 1.3.\n- RPCs in this order: https://rpc.sepolia.ethpandaops.io (it serves old logs), https://sepolia.rpc.sentio.xyz, https://ethereum-sepolia-rpc.publicnode.com.\nCheck it in a real browser against live Sepolia: faucet, approve, credit, then the stack, its value and the leaderboards update; get test IMD and open an application."
+        }
+      ]
+    },
+    "permissions": {
+      "github": true,
+      "ipfs": "imd-acc-sepolia-v2",
+      "onchain": {
+        "kind": "evm_contracts",
+        "chainId": 11155111
+      }
+    }
+  }
+}

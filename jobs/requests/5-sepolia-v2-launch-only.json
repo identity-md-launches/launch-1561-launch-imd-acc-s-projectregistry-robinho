@@ -1,0 +1,31 @@
+{
+  "action": "launch.open",
+  "input": {
+    "objective": "Launch imd/acc's second Sepolia test run from this repository's sepolia branch: deploy the updated Stacker and the new ProjectRegistry, exactly as launch.json lists them, wired to the live TestIMD and TestSIMD of launch #1129 and to IdentityMD's Intake v2. PLEA's next version will pay its cashback through this Stacker and apply to this registry; mainnet will use the same code from the main branch. imd/acc pays trading cashback to traders as staked IMD (sIMD), 0.25% to 1% of each trade at each project's choice, funded from the project's existing fees.\n\nDEPLOY (Sepolia, two contracts, in this order):\n1. Stacker(imd, sImd) with imd = 0x2b69099e59b05901faa1dd164fabf098bf831e82 (TestIMD; faucet() gives 10,000 tIMD per address per 24h) and sImd = 0xf9e2eec3b610ec6781f7438ac5fb4bc049d81cc1 (TestSIMD, a StakedIMD copy whose owner 0x4b91…6821 can pause it). Both are live; do not deploy new ones. src/Stacker.sol stays as it is: no owner, admin, fee, pause or upgrade; credit(trader, imdAmount) pulls IMD from msg.sender and calls sIMD.deposit(imdAmount, trader); per-project totals on chain; event Stacked(project, trader, imd, shares). The constructor checks the vault only where it has code, so the empty-chain rehearsal passes.\n2. ProjectRegistry(intake, oracleAsset, stacker, oracleSigner, questionChainId, challengeBond, challengeCooldown) = (0xa43e6f75ee006411f79ac1c84120606c2330de82 Intake v2, 0x44a1cd38474fb1748400e7deb5f8d786cce3f89a Sepolia test IMD, $contract:Stacker, 0x5598aa9146215bc13eb26f2c692ad1461fd32982 oracle signer, 1, 5e18, 3600). No owner. Anyone calls applyListing(project, name, sourceUrl, rateBps 25-100, beneficiary) or challenge(project, reason), paying the 0.5 IMD oracle fee (plus the bond for a challenge); the registry asks Intake v2 one yes-or-no question with requestWithFailure. onOracleResult (0x510379c7) accepts only the Intake, only its own open request, only a signature by the oracle signer for this contract issued after the ask, from a panel of 15 with 11 agreeing: yes lists from that block, or keeps a challenged project (bond to its beneficiary); no rejects, or delists from that block (bond back). onOracleFailure (0xa7980e31) only clears the open question and returns a bond; expire clears one after a day or once the Intake completed it. Questions are filed under chain 1 (the oracle has no Sepolia RPC) and name Sepolia in the text. src/ProjectRegistry.sol and src/oracle/OracleAttestation.sol stay as they are.\n- test/mocks holds test doubles only. Keep foundry.toml as it is (solc 0.8.26, cancun, 10,000 runs, bytecode_hash none).\n\nFACTS (2026-10-11): TestSIMD asset() = TestIMD, owner 0x4b91…6821, not paused. Intake v2 is live on Sepolia (callback gas 1,000,000) and sells oracle.request@oracle-1 for 0.5 of the test IMD, which anyone can mint. On a Sepolia fork with the real Intake, applyListing paid it and opened a request with both callbacks; a listing answer used 77k gas.\n\nTESTS: forge test passes (68 tests). SepoliaFork and RegistrySepoliaFork run against live Sepolia when SEPOLIA_RPC_URL is set; MainnetFork against mainnet when ETH_RPC_URL is set; skipped otherwise. Keep all of them passing.\n\nREADME: once live, add both addresses as \"Sepolia test run 2\" in the Deployments table.",
+    "onchain": "evm_contracts",
+    "chainId": 11155111,
+    "github": true,
+    "repoUrl": "https://github.com/khaed1/imd-acc.git",
+    "baseCommit": "724d1fcffdb4180daf76fc556f8e5608234f8eb9",
+    "references": [
+      "evm-contracts-launch",
+      "defi-native",
+      "eth-security",
+      "eth-testing",
+      "pashov-skill",
+      "solidity-security-review"
+    ],
+    "shape": "chain",
+    "steps": [
+      {
+        "skill": "audit-imported-code"
+      },
+      {
+        "skill": "adapt-contract-project"
+      },
+      {
+        "skill": "adversarial-review"
+      }
+    ]
+  }
+}

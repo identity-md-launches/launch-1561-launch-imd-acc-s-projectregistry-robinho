@@ -1,0 +1,18 @@
+{
+  "kind": "evm_contracts",
+  "contracts": [
+    {
+      "contract": "ProjectRegistry",
+      "constructorArgs": [
+        "0xa43e6F75ee006411F79Ac1C84120606C2330DE82",
+        "0x5F7Bb59365ce557C26dbcAa4EE9d39A4b95B7127",
+        "0x4De07c2fa46D5d6ED9CEB3f38ec56d3461b3E898",
+        "0x5598Aa9146215Bc13eb26f2c692Ad1461Fd32982",
+        "4663",
+        "20000000000000000000",
+        "604800"
+      ]
+    }
+  ],
+  "notes": "imd/acc on Robinhood Chain (chain 4663), second launch: one contract, the ProjectRegistry, the list of the projects on Robinhood Chain whose cashback earns points, decided by IdentityMD oracle panels through Intake v2 (0xa43e...de82, the same address as on Ethereum), paid in Robinhood Chain's IMD (0x5f7b...7127, the same token over IMD's own LayerZero bridge). It names the live RemoteStacker 0x4de0...e898 (launch #1537) in its questions as the Stacker and never calls it; the RemoteStacker is not redeployed. The code is the mainnet registry's (launch #1495, 0x7f53...7faa): version 3.1 of the panel rules, owner-only applications, one beneficiary handoff per day, owed bonds, the registry itself refused as beneficiary. Settings agreed by the owner, the same as on mainnet: challenge bond 20 IMD, challenge cooldown 7 days (604800 s); panel 15 seats with 11 agreeing and a 1-day expiry are constants. Each ask pays the oracle fee read live from the Intake (ORACLE_FEE(), 0.5 IMD on Robinhood Chain). Questions are filed under chain 4663: the oracle reads Robinhood Chain, and answers must carry chainId 4663 and be signed by the oracle signer 0x5598...2982 for this contract, within the Intake's 200,000 callback gas (the same as on Ethereum). A listed project's beneficiary may hand its points to another wallet at most once per day and never while a question is open. Settling or clearing a question never waits on paying a bond: a refused transfer is recorded in bondOwed and claimed with claimBond(to). No owner; its constructor makes no external call. Test doubles under test/mocks and test/trial are not deployed."
+}

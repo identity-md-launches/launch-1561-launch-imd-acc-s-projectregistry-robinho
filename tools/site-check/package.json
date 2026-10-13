@@ -1,0 +1,9 @@
+{
+  "name": "imd-acc-site-check",
+  "private": true,
+  "type": "module",
+  "description": "Browser checks for the imd/acc Sepolia test site. Not part of the contracts.",
+  "dependencies": {
+    "axe-core": "4.10.2"
+  }
+}
